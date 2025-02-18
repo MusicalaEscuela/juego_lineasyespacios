@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego del Pentagrama 🎼</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.26/Tone.min.js"></script>
+</head>
+<body>
+
+    <!-- Logo de Musicala -->
+    <img src="https://static.wixstatic.com/media/85afce_3adb3865c88a492b93a8bf2dc69049c3~mv2.png" 
+         alt="Musicala Logo" class="logo">
+
+    <!-- 🔧 Configuración -->
+    <div class="configuracion">
+        <h1>🎼 <b>Juego del Pentagrama</b> 🎵</h1>
+        <p>Selecciona la nota correcta para la línea o espacio resaltado.</p>
+    
+        <h3>🎵 <b>Selecciona las notas:</b></h3>
+    
+        <div class="notas">
+            <!-- Notas en las líneas -->
+            <h4>✏️ <b>Notas en las líneas</b></h4>
+            <div id="seleccionLineas">
+                <label><input type="checkbox" value="Mi4" checked> Mi</label>
+                <label><input type="checkbox" value="Sol4" checked> Sol</label>
+                <label><input type="checkbox" value="Si4" checked> Si</label>
+                <label><input type="checkbox" value="Re5" checked> Re</label>
+                <label><input type="checkbox" value="Fa5" checked> Fa</label>
+            </div>
+    
+            <!-- Notas en los espacios -->
+            <h4>✏️ <b>Notas en los espacios</b></h4>
+            <div id="seleccionEspacios">
+                <label><input type="checkbox" value="Fa4" checked> Fa</label>
+                <label><input type="checkbox" value="La4" checked> La</label>
+                <label><input type="checkbox" value="Do5" checked> Do</label>
+                <label><input type="checkbox" value="Mi5" checked> Mi</label>
+            </div>
+        </div>
+    
+        <!-- Selector de tiempo -->
+        <h3>⏳ <b>Selecciona el tiempo de juego:</b></h3>
+        <select id="tiempoJuego">
+            <option value="60">1 minuto</option>
+            <option value="120">2 minutos</option>
+            <option value="180">3 minutos</option>
+            <option value="240">4 minutos</option>
+            <option value="300">5 minutos</option>
+        </select>
+    
+        <br><br>
+        <button onclick="actualizarNotas()" class="btn-start">Aplicar Selección y Empezar</button>
+    </div>    
+
+    <!-- 🎼 Sección del Juego -->
+    <div class="juego">
+    <!-- 📌 Columna izquierda: Información del juego -->
+    <div class="info-juego">
+        <p id="vidas">Vidas: ❤️❤️❤️</p>
+        <p id="cronometro">Tiempo: <span id="tiempo">60</span>
+        <p id="puntaje">Puntaje: <span id="puntos">0</span></p>
+    </div>
+
+    <!-- 📌 Columna derecha: Pentagrama y botones -->
+    <div class="contenedor-pentagrama">
+        <img id="imagenPentagrama" class="pentagrama" src="" alt="Pentagrama resaltado">
+        <div class="botones" id="opciones"></div>
+        <p id="mensaje"></p>
+    </div>
+</div>
+
+    <p class="copyright">© 2025 Musicala. Todos los derechos reservados.</p>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
