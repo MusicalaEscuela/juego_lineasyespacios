@@ -1,245 +1,689 @@
-/* Estilos Generales */
+/* ================================================================
+   MUSINOTAS — styles.css
+   Lectura de pentagrama · Musicala SAS
+================================================================ */
+
+/* ---- Variables ---- */
+:root {
+  --bg:        #0c0b18;
+  --bg2:       #16142b;
+  --card:      #1e1c35;
+  --card2:     #272544;
+  --border:    rgba(255,255,255,0.07);
+  --border2:   rgba(255,255,255,0.14);
+
+  --accent:    #FFD166;   /* dorado */
+  --accent2:   #06D6A0;   /* verde teal */
+  --danger:    #EF476F;   /* coral */
+  --info:      #118AB2;   /* azul */
+  --purple:    #9B72CF;   /* violeta */
+
+  --text:      #f0eeff;
+  --text2:     #8b87b0;
+  --text3:     #5d5a80;
+
+  --staff-bg:  #fffef6;
+  --staff-line:#2a2a2a;
+  --note-fill: #1a1830;
+  --note-ok:   #06D6A0;
+  --note-err:  #EF476F;
+
+  --shadow:    0 8px 40px rgba(0,0,0,0.5);
+  --shadow-sm: 0 4px 16px rgba(0,0,0,0.35);
+  --radius:    18px;
+  --radius-sm: 10px;
+}
+
+/* ---- Reset ---- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
 body {
-    font-family: 'Poppins', Arial, sans-serif;
-    text-align: center;
-    background: linear-gradient(135deg, #a8e6cf, #ffaaa5);
-    color: #333;
-    margin: 0;
-    padding: 20px;
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Configuración */
-.configuracion {
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    max-width: 900px;
-    width: 90%; /* Permite que se adapte en pantallas pequeñas */
-    margin: 20px auto;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+/* Fondo con puntos sutiles */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.12) 1px, transparent 1px);
+  background-size: 36px 36px;
+  pointer-events: none;
+  z-index: 0;
 }
 
-/* Sección de Juego */
-.juego {
-    display: flex; /* 📌 Alinea en fila */
-    align-items: center; /* 📌 Asegura que estén alineados verticalmente */
-    justify-content: center; /* 📌 Centra todo horizontalmente */
-    gap: 40px; /* 📌 Espaciado entre columnas */
-    padding: 20px;
-    max-width: 1100px; /* 📌 Evita que ocupe toda la pantalla */
-    margin: 0 auto;
+/* ---- Sistema de pantallas ---- */
+.screen {
+  display: none;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+.screen.active { display: flex; flex-direction: column; }
+
+.screen-content {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+  width: 100%;
 }
 
-.container {
-    max-width: 800px;
-    margin: 50px auto;
-    padding: 20px;
-    background-color: #ffffff;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
+/* ================================================================
+   PANTALLA: HOME
+================================================================ */
+
+#screen-home {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
 }
 
-/* Logo */
+.home-bg-deco {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  font-size: clamp(4rem, 12vw, 8rem);
+  color: rgba(255,255,255,0.03);
+  pointer-events: none;
+  user-select: none;
+  padding: 0 10px;
+}
+
+.home-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 20px;
+  position: relative;
+  z-index: 1;
+}
+
 .logo {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    max-width: 100px;
-    height: auto;
-    border-radius: 10px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  width: 100px;
+  height: auto;
+  filter: drop-shadow(0 4px 20px rgba(255,209,102,0.3));
+  margin-bottom: 4px;
 }
 
-/* Imagen del pentagrama */
-.pentagrama {
-    max-width: 80%;
-    height: auto;
-    display: block;
-    margin: 10px auto;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+.game-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(3.2rem, 12vw, 5.5rem);
+  color: var(--accent);
+  text-shadow: 0 2px 30px rgba(255,209,102,0.45);
+  line-height: 1;
 }
 
-.contenedor-pentagrama {
-    display: flex;
-    flex-direction: column; /* Asegura que el pentagrama esté arriba y los botones abajo */
-    align-items: center;
-    background-color: white; /* 📌 Fondo blanco */
-    padding: 20px; /* 📌 Espaciado interno para que no se vea pegado */
-    border-radius: 10px; /* 📌 Bordes redondeados para que se vea elegante */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* 📌 Efecto de sombra */
-}
-    
-/* Botones */
-.botones {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 15px; /* Asegura que estén separados del pentagrama */
-    width: 100%; /* Ocupa todo el ancho */
+.game-subtitle {
+  font-size: 1.05rem;
+  color: var(--text2);
+  margin-bottom: 8px;
 }
 
-button {
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    font-size: 30px;
-    font-weight: bold;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: 0.3s;
+.home-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 280px;
+  margin-top: 8px;
 }
 
-button:hover {
-    background-color: #0056b3;
+.home-clef-row {
+  display: flex;
+  gap: 28px;
+  margin-top: 28px;
+}
+.clef-deco {
+  font-size: 2.8rem;
+  opacity: 0.18;
+  user-select: none;
+  animation: floatClef 4s ease-in-out infinite;
+}
+.clef-deco.fa { animation-delay: 2s; }
+@keyframes floatClef {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
 }
 
-/* Información del juego */
-.info-juego {
-    width: 200px; /* Tamaño fijo */
-    text-align: left; /* Alinea el texto a la izquierda */
-    font-size: 25px;
+/* ================================================================
+   TIPOGRAFÍA GENERAL
+================================================================ */
+
+h2 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.9rem;
+  color: var(--accent);
+  margin-bottom: 6px;
 }
 
-/* Mensaje */
-#mensaje {
-    font-size: 30px;
-    font-weight: bold;
-    margin-top: 20px;
-    color: #333;
-    transition: 0.3s;
+.screen-desc {
+  color: var(--text2);
+  font-size: 0.92rem;
+  margin-bottom: 24px;
+  line-height: 1.5;
 }
 
-/* Puntaje */
-#puntaje {
-    font-size: 35px;
-    font-weight: bold;
-    color: #007BFF;
-    margin-top: 20px;
+/* ================================================================
+   BOTONES
+================================================================ */
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent) 0%, #FF9F1C 100%);
+  color: #1a1428;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 1.05rem;
+  padding: 14px 28px;
+  border: none; border-radius: 50px;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+  box-shadow: 0 4px 24px rgba(255,209,102,0.32);
+  width: 100%;
+  letter-spacing: .3px;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 7px 32px rgba(255,209,102,0.48); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-secondary {
+  background: var(--card);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 13px 24px;
+  border: 1px solid var(--border2);
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background .15s, transform .15s;
+  width: 100%;
+}
+.btn-secondary:hover { background: var(--card2); transform: translateY(-1px); }
+
+.btn-back {
+  background: transparent;
+  color: var(--text2);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 8px 0;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 18px;
+  transition: color .15s;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.btn-back:hover { color: var(--text); }
+
+.btn-small {
+  background: var(--card2);
+  color: var(--text2);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.btn-small:hover { background: var(--card); color: var(--text); }
+.btn-small.danger-btn:hover { color: var(--danger); border-color: var(--danger); }
+
+/* ================================================================
+   PANTALLA: MODO
+================================================================ */
+
+.mode-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 20px;
+}
+@media (max-width: 500px) { .mode-cards { grid-template-columns: 1fr; } }
+
+.mode-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 26px 20px;
+  cursor: pointer;
+  transition: transform .2s, border-color .2s, box-shadow .2s;
+  position: relative; overflow: hidden;
+}
+.mode-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,209,102,0.04), transparent);
+  opacity: 0; transition: opacity .2s;
+}
+.mode-card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 8px 36px rgba(255,209,102,0.14); }
+.mode-card:hover::before { opacity: 1; }
+.mode-icon { font-size: 2.4rem; margin-bottom: 12px; }
+.mode-card h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; }
+.mode-card p  { font-size: 0.85rem; color: var(--text2); line-height: 1.55; margin-bottom: 14px; }
+.mode-badge {
+  display: inline-block;
+  background: rgba(255,209,102,0.13);
+  color: var(--accent);
+  font-size: 0.72rem; font-weight: 700;
+  padding: 4px 10px; border-radius: 20px;
 }
 
-/* Copyright */
-.copyright {
-    font-size: 20px;
-    color: #000000;
-    margin-top: 20px;
+/* ================================================================
+   PANTALLA: NIVELES
+================================================================ */
+
+.levels-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 8px;
+}
+@media (max-width: 500px) { .levels-grid { grid-template-columns: 1fr; } }
+
+.level-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  cursor: pointer;
+  transition: all .2s;
+  position: relative;
+  overflow: hidden;
+}
+.level-card:hover:not(.locked) {
+  border-color: var(--accent2);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 28px rgba(6,214,160,0.14);
+}
+.level-card.locked { opacity: 0.45; cursor: not-allowed; }
+.level-card.completed { border-color: rgba(6,214,160,0.4); }
+
+.level-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 8px;
+}
+.level-icon { font-size: 1.4rem; }
+.level-num  { font-size: 0.68rem; font-weight: 800; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
+.level-name { font-weight: 800; font-size: 0.93rem; margin-bottom: 2px; }
+.level-sub  { font-size: 0.78rem; color: var(--text2); margin-bottom: 10px; }
+
+.level-meta {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 0.72rem; color: var(--text3); margin-bottom: 8px;
+}
+.level-progress-bar {
+  height: 4px;
+  background: var(--bg);
+  border-radius: 4px; overflow: hidden;
+}
+.level-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent2), var(--accent));
+  border-radius: 4px;
+  transition: width .6s cubic-bezier(.22,1,.36,1);
+}
+.level-lock-icon {
+  position: absolute; top: 12px; right: 12px;
+  font-size: 0.9rem; color: var(--text3);
+}
+.level-stars {
+  position: absolute; top: 12px; right: 12px;
+  font-size: 0.85rem;
+}
+.level-req {
+  font-size: 0.72rem; color: var(--text3);
+  margin-top: 6px;
+}
+.level-req span { color: var(--accent); }
+
+/* ================================================================
+   PANTALLA: CONFIG (MODO LIBRE)
+================================================================ */
+
+.config-section { margin-bottom: 26px; }
+.config-section h3 {
+  font-size: 0.82rem; font-weight: 800;
+  color: var(--text2); text-transform: uppercase;
+  letter-spacing: 1px; margin-bottom: 10px;
 }
 
-#vidas {
-    font-size: 20px;
-    font-weight: bold;
-    color: #FF3333;
-    margin-top: 10px;
+.toggle-group { display: flex; gap: 8px; flex-wrap: wrap; }
+.toggle-btn {
+  background: var(--card);
+  color: var(--text2);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 8px 16px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.88rem; font-weight: 700;
+  cursor: pointer;
+  transition: all .15s;
+}
+.toggle-btn.active {
+  background: rgba(255,209,102,0.14);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.toggle-btn:hover:not(.active) { background: var(--card2); color: var(--text); }
+
+.note-picker { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.picker-actions { display: flex; gap: 8px; }
+
+.note-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 7px 14px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.88rem; font-weight: 700;
+  cursor: pointer;
+  transition: all .15s;
+  user-select: none;
+}
+.note-chip.selected {
+  background: rgba(6,214,160,0.13);
+  border-color: var(--accent2);
+  color: var(--accent2);
+}
+.note-chip:hover:not(.selected) { background: var(--card2); color: var(--text); }
+.chip-sub { font-size: 0.68rem; color: var(--text3); font-weight: 600; }
+.note-chip.selected .chip-sub { color: var(--accent2); opacity: 0.7; }
+
+.config-row { display: flex; gap: 20px; }
+.config-row > div { flex: 1; }
+
+.config-select {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.92rem;
+  width: 100%;
+  cursor: pointer;
+  appearance: none;
+  outline: none;
+  transition: border-color .15s;
+}
+.config-select:focus { border-color: var(--accent); }
+
+/* ================================================================
+   PANTALLA: JUEGO
+================================================================ */
+
+#screen-game { padding: 0; }
+
+.game-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 14px 14px 20px;
+  gap: 10px;
 }
 
-/* ✅ Mejorar la sección de selección de notas */
-.seleccion {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.8rem; /* Aumentar tamaño del texto */
-    font-weight: bold;
+/* HUD */
+.hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%; max-width: 580px;
+  background: var(--card);
+  border-radius: 50px;
+  padding: 10px 22px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.hud-item { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.hud-center { flex: 1; }
+.hud-label {
+  font-size: 0.6rem; font-weight: 800;
+  color: var(--text3); text-transform: uppercase; letter-spacing: 1px;
+}
+.hud-value {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.5rem; color: var(--accent); line-height: 1;
+}
+#hud-lives { font-size: 1.1rem; letter-spacing: 3px; min-height: 1.4rem; }
+.hud-value.time-warning { color: var(--danger); animation: timePulse .5s ease-in-out infinite alternate; }
+@keyframes timePulse { from {opacity:1} to {opacity:.4} }
+
+/* Combo */
+.combo-display {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.4rem;
+  color: #FF9F1C;
+  text-shadow: 0 0 20px rgba(255,159,28,.55);
+  animation: comboPop .3s cubic-bezier(.34,1.56,.64,1);
+  min-height: 2rem; text-align: center;
+}
+@keyframes comboPop {
+  from { transform: scale(.6); opacity:0; }
+  to   { transform: scale(1); opacity:1; }
+}
+.hidden { display: none !important; }
+
+/* Pentagrama */
+.staff-container {
+  background: var(--staff-bg);
+  border-radius: var(--radius);
+  padding: 18px 14px;
+  box-shadow: var(--shadow);
+  width: 100%; max-width: 580px;
+  position: relative;
+  transition: box-shadow .2s;
+}
+.staff-container.shake {
+  animation: containerShake .4s ease-out;
+}
+.staff-container.pulse {
+  animation: containerPulse .4s ease-out;
+}
+@keyframes containerShake {
+  0%,100% { transform: translateX(0); }
+  20%      { transform: translateX(-8px); }
+  40%      { transform: translateX(8px); }
+  60%      { transform: translateX(-5px); }
+  80%      { transform: translateX(5px); }
+}
+@keyframes containerPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(6,214,160,.6); }
+  70%  { box-shadow: 0 0 0 14px rgba(6,214,160,0); }
+  100% { box-shadow: 0 0 0 0 rgba(6,214,160,0); }
 }
 
-/* ✅ Aumentar el tamaño de los checkboxes */
-input[type="checkbox"] {
-    width: 25px; /* Más grande */
-    height: 25px;
-    cursor: pointer;
-    margin-right: 8px;
+#staff-svg { width: 100%; height: auto; display: block; overflow: visible; }
+
+/* Feedback */
+.feedback-msg {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.35rem;
+  min-height: 2rem;
+  text-align: center;
+  transition: all .15s;
+}
+.feedback-msg.correct {
+  color: var(--accent2);
+  animation: feedbackPop .3s cubic-bezier(.34,1.56,.64,1);
+}
+.feedback-msg.wrong {
+  color: var(--danger);
+  animation: feedbackFade .3s ease-out;
+}
+@keyframes feedbackPop {
+  from { transform: scale(.7); opacity:0; }
+  to   { transform: scale(1); opacity:1; }
+}
+@keyframes feedbackFade {
+  from { opacity:0; transform: translateY(-4px); }
+  to   { opacity:1; transform: translateY(0); }
 }
 
-/* ✅ Espaciado mejorado en la lista de notas */
-#seleccionLineas, #seleccionEspacios {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-    font-size: 1.6rem;
+/* Botones de respuesta */
+.answer-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 9px;
+  max-width: 580px; width: 100%;
+}
+.answer-btn {
+  background: var(--card);
+  color: var(--text);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 13px 10px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: all .15s;
+  flex: 1;
+  min-width: 66px; max-width: 100px;
+}
+.answer-btn:hover:not(:disabled) {
+  background: var(--card2);
+  border-color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(255,209,102,.15);
+}
+.answer-btn:active:not(:disabled) { transform: translateY(-1px); }
+.answer-btn:disabled { cursor: default; }
+.answer-btn.correct-answer {
+  background: rgba(6,214,160,.18);
+  border-color: var(--accent2);
+  color: var(--accent2);
+  animation: feedbackPop .3s cubic-bezier(.34,1.56,.64,1);
+}
+.answer-btn.wrong-answer {
+  background: rgba(239,71,111,.18);
+  border-color: var(--danger);
+  color: var(--danger);
 }
 
-/* ✅ Mejorar el selector de tiempo */
-.seleccion-tiempo select {
-    font-size: 1.6rem;
-    padding: 10px;
-    border-radius: 8px;
-    border: 2px solid #007BFF;
-    cursor: pointer;
+.btn-quit {
+  background: transparent;
+  color: var(--text3);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 8px 20px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.82rem; font-weight: 600;
+  cursor: pointer;
+  margin-top: auto;
+  transition: color .15s, border-color .15s;
+}
+.btn-quit:hover { color: var(--danger); border-color: var(--danger); }
+
+/* ================================================================
+   PANTALLA: RESULTADOS
+================================================================ */
+
+#screen-results { align-items: center; justify-content: center; }
+
+.results-content { text-align: center; padding-top: 40px; }
+
+.results-emoji {
+  font-size: 4.5rem;
+  margin-bottom: 10px;
+  animation: emojiPop .6s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes emojiPop {
+  from { transform: scale(0) rotate(-30deg); opacity:0; }
+  to   { transform: scale(1) rotate(0deg); opacity:1; }
 }
 
-/* ✅ Agrandar el texto de las etiquetas de checkboxes */
-#seleccionLineas label, #seleccionEspacios label {
-    font-size: 1.8rem; /* Tamaño más grande */
-    font-weight: bold;
-    display: flex;
-    align-items: center; /* Alinea el checkbox con el texto */
-    gap: 10px; /* Espaciado entre el checkbox y el texto */
+#results-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 2rem;
+  color: var(--text);
+  margin-bottom: 28px;
 }
 
-/* ✅ Agrandar la letra del selector de tiempo */
-#tiempoJuego {
-    font-size: 1.5rem; /* Tamaño más grande */
-    padding: 10px;
-    border-radius: 8px;
-    border: 2px solid #007BFF;
-    cursor: pointer;
+.results-stats {
+  display: flex; flex-wrap: wrap;
+  gap: 12px; justify-content: center;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 22px;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+  min-width: 88px;
+}
+.stat-value {
+  font-family: 'Fredoka One', cursive;
+  font-size: 2rem; color: var(--accent);
+}
+.stat-label {
+  font-size: 0.7rem; font-weight: 800;
+  color: var(--text2); text-transform: uppercase; letter-spacing: 1px;
 }
 
-/* ✅ Agrandar los títulos */
-h3, h4 {
-    font-size: 1.4rem; /* Tamaño más grande */
+.level-unlock-msg {
+  background: rgba(6,214,160,.1);
+  border: 1px solid var(--accent2);
+  border-radius: var(--radius);
+  padding: 12px 20px;
+  color: var(--accent2);
+  font-weight: 700;
+  margin-bottom: 20px;
+  animation: feedbackPop .5s cubic-bezier(.34,1.56,.64,1);
 }
 
-@media (max-width: 768px) { /* 📱 Ajustes para móviles */
-    .configuracion {
-        width: 95%; /* Más adaptable en pantallas pequeñas */
-        padding: 20px;
-    }
+.results-buttons {
+  display: flex; flex-direction: column;
+  gap: 10px;
+  max-width: 280px; margin: 0 auto;
+}
 
-    .juego {
-        flex-direction: column; /* 📌 Cambia de fila a columna */
-        gap: 20px; /* Reduce el espacio */
-    }
+/* ================================================================
+   PANTALLA: RÉCORDS
+================================================================ */
 
-    .info-juego {
-        width: 100%; /* Ocupa todo el ancho */
-        text-align: center; /* Centra la info */
-        font-size: 20px; /* Reduce el tamaño del texto */
-    }
+.records-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+.record-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.record-left {}
+.record-name { font-weight: 700; font-size: .95rem; }
+.record-sub  { font-size: .78rem; color: var(--text2); margin-top: 2px; }
+.record-score {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.5rem; color: var(--accent);
+  white-space: nowrap;
+}
 
-    #seleccionLineas, #seleccionEspacios {
-        flex-direction: column; /* Alinea los checkboxes verticalmente */
-        gap: 10px;
-    }
+/* ================================================================
+   RESPONSIVE
+================================================================ */
 
-    input[type="checkbox"] {
-        width: 20px; /* Reduce tamaño en móviles */
-        height: 20px;
-    }
+@media (max-width: 380px) {
+  .answer-btn { font-size: 1.1rem; padding: 11px 8px; min-width: 56px; }
+  .hud-value  { font-size: 1.3rem; }
+  .game-layout { gap: 8px; }
+}
 
-    #tiempoJuego {
-        font-size: 1.5rem; /* Reduce el tamaño del selector */
-    }
-
-    h1, h3, h4 {
-        font-size: 1.8rem; /* Ajusta títulos para mejor legibilidad */
-    }
-
-    .contenedor-pentagrama {
-        width: 100%; /* Se adapta al ancho de la pantalla */
-        padding: 10px;
-    }
-
-    .botones {
-        flex-wrap: wrap;
-        gap: 5px;
-    }
-
-    button {
-        font-size: 20px; /* Reduce el tamaño de los botones */
-        padding: 10px 15px;
-    }
+@media (max-height: 680px) {
+  .game-layout { gap: 7px; padding: 10px 12px; }
+  .staff-container { padding: 12px 10px; }
 }

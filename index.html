@@ -1,80 +1,234 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Musinotas Juego de líneas y espacios 🎼</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.26/Tone.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Musinotas 🎼</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.26/Tone.min.js"></script>
 </head>
 <body>
 
-    <!-- Logo de Musicala -->
-    <img src="https://static.wixstatic.com/media/85afce_3adb3865c88a492b93a8bf2dc69049c3~mv2.png" 
-         alt="Musicala Logo" class="logo">
-
-    <!-- 🔧 Configuración -->
-    <div class="configuracion">
-        <h1>🎼 <b>Juego del Pentagrama</b> 🎵</h1>
-        <p>Selecciona la nota correcta para la línea o espacio resaltado.</p>
-    
-        <h3>🎵 <b>Selecciona las notas:</b></h3>
-    
-        <div class="notas">
-            <!-- Notas en las líneas -->
-            <h4>✏️ <b>Notas en las líneas</b></h4>
-            <div id="seleccionLineas">
-                <label><input type="checkbox" value="Mi4" checked> Mi</label>
-                <label><input type="checkbox" value="Sol4" checked> Sol</label>
-                <label><input type="checkbox" value="Si4" checked> Si</label>
-                <label><input type="checkbox" value="Re5" checked> Re</label>
-                <label><input type="checkbox" value="Fa5" checked> Fa</label>
-            </div>
-    
-            <!-- Notas en los espacios -->
-            <h4>✏️ <b>Notas en los espacios</b></h4>
-            <div id="seleccionEspacios">
-                <label><input type="checkbox" value="Fa4" checked> Fa</label>
-                <label><input type="checkbox" value="La4" checked> La</label>
-                <label><input type="checkbox" value="Do5" checked> Do</label>
-                <label><input type="checkbox" value="Mi5" checked> Mi</label>
-            </div>
-        </div>
-    
-        <!-- Selector de tiempo -->
-        <h3>⏳ <b>Selecciona el tiempo de juego:</b></h3>
-        <select id="tiempoJuego">
-            <option value="60">1 minuto</option>
-            <option value="120">2 minutos</option>
-            <option value="180">3 minutos</option>
-            <option value="240">4 minutos</option>
-            <option value="300">5 minutos</option>
-        </select>
-    
-        <br><br>
-        <button onclick="actualizarNotas()" class="btn-start">Aplicar Selección y Empezar</button>
-    </div>    
-
-    <!-- 🎼 Sección del Juego -->
-    <div class="juego">
-    <!-- 📌 Columna izquierda: Información del juego -->
-    <div class="info-juego">
-        <p id="vidas">Vidas: ❤️❤️❤️</p>
-        <p id="cronometro">Tiempo: <span id="tiempo">60</span>
-        <p id="puntaje">Puntaje: <span id="puntos">0</span></p>
+<!-- ═══════════════════════════════════════════════
+     PANTALLA: HOME
+════════════════════════════════════════════════ -->
+<div id="screen-home" class="screen active">
+  <div class="home-bg-deco" aria-hidden="true">
+    <span>𝄞</span><span>𝄢</span><span>♩</span><span>♪</span><span>♫</span>
+  </div>
+  <div class="home-content">
+    <img src="https://static.wixstatic.com/media/85afce_3adb3865c88a492b93a8bf2dc69049c3~mv2.png"
+         alt="Musicala" class="logo" onerror="this.style.display='none'">
+    <h1 class="game-title">Musinotas</h1>
+    <p class="game-subtitle">Domina la lectura del pentagrama</p>
+    <div class="home-buttons">
+      <button class="btn-primary" onclick="showScreen('mode')">🎮 Jugar</button>
+      <button class="btn-secondary" onclick="showScreen('records')">🏆 Récords</button>
     </div>
-
-    <!-- 📌 Columna derecha: Pentagrama y botones -->
-    <div class="contenedor-pentagrama">
-        <img id="imagenPentagrama" class="pentagrama" src="" alt="Pentagrama resaltado">
-        <div class="botones" id="opciones"></div>
-        <p id="mensaje"></p>
+    <div class="home-clef-row">
+      <span class="clef-deco sol">𝄞</span>
+      <span class="clef-deco fa">𝄢</span>
     </div>
+  </div>
 </div>
 
-    <p class="copyright">© 2025 Musicala. Todos los derechos reservados.</p>
+<!-- ═══════════════════════════════════════════════
+     PANTALLA: MODO
+════════════════════════════════════════════════ -->
+<div id="screen-mode" class="screen">
+  <div class="screen-content">
+    <button class="btn-back" onclick="showScreen('home')">← Inicio</button>
+    <h2>¿Cómo quieres practicar?</h2>
+    <div class="mode-cards">
 
-    <script src="script.js"></script>
+      <div class="mode-card" onclick="showScreen('levels')">
+        <div class="mode-icon">🎯</div>
+        <h3>Modo Progresivo</h3>
+        <p>Avanza nivel por nivel, desde las notas más básicas hasta dominar las dos claves.</p>
+        <span class="mode-badge">8 niveles</span>
+      </div>
 
+      <div class="mode-card" onclick="showScreen('config')">
+        <div class="mode-icon">🎨</div>
+        <h3>Modo Libre</h3>
+        <p>Elige exactamente qué notas practicar, a tu ritmo y con tus propias reglas.</p>
+        <span class="mode-badge">Personalizable</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PANTALLA: NIVELES
+════════════════════════════════════════════════ -->
+<div id="screen-levels" class="screen">
+  <div class="screen-content">
+    <button class="btn-back" onclick="showScreen('mode')">← Modos</button>
+    <h2>🎯 Modo Progresivo</h2>
+    <p class="screen-desc">Cumple el porcentaje de aciertos requerido para desbloquear el siguiente nivel.</p>
+    <div id="levels-grid" class="levels-grid"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PANTALLA: CONFIGURACIÓN (MODO LIBRE)
+════════════════════════════════════════════════ -->
+<div id="screen-config" class="screen">
+  <div class="screen-content">
+    <button class="btn-back" onclick="showScreen('mode')">← Modos</button>
+    <h2>🎨 Modo Libre</h2>
+
+    <div class="config-section">
+      <h3>🎼 Clave</h3>
+      <div class="toggle-group" id="clef-toggle">
+        <button class="toggle-btn active" data-value="treble" onclick="setConfigClef('treble')">𝄞 Clave de Sol</button>
+        <button class="toggle-btn"        data-value="bass"   onclick="setConfigClef('bass')">𝄢 Clave de Fa</button>
+        <button class="toggle-btn"        data-value="both"   onclick="setConfigClef('both')">Ambas</button>
+      </div>
+    </div>
+
+    <div class="config-section">
+      <h3>📍 Tipo de nota</h3>
+      <div class="toggle-group" id="type-toggle">
+        <button class="toggle-btn active" data-value="all"   onclick="setConfigType('all')">Líneas y espacios</button>
+        <button class="toggle-btn"        data-value="line"  onclick="setConfigType('line')">Solo líneas</button>
+        <button class="toggle-btn"        data-value="space" onclick="setConfigType('space')">Solo espacios</button>
+      </div>
+    </div>
+
+    <div class="config-section">
+      <h3>🎵 Notas a practicar</h3>
+      <div id="note-picker" class="note-picker"></div>
+      <div class="picker-actions">
+        <button class="btn-small" onclick="selectAllNotes()">Todas</button>
+        <button class="btn-small" onclick="clearAllNotes()">Ninguna</button>
+      </div>
+    </div>
+
+    <div class="config-section config-row">
+      <div>
+        <h3>⏱ Tiempo</h3>
+        <select id="config-time" class="config-select">
+          <option value="0">Sin límite</option>
+          <option value="60" selected>1 minuto</option>
+          <option value="120">2 minutos</option>
+          <option value="180">3 minutos</option>
+          <option value="300">5 minutos</option>
+        </select>
+      </div>
+      <div>
+        <h3>❤️ Vidas</h3>
+        <select id="config-lives" class="config-select">
+          <option value="3" selected>3 vidas</option>
+          <option value="5">5 vidas</option>
+          <option value="10">10 vidas</option>
+          <option value="0">Infinitas</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="startFreeGame()">¡Empezar! 🚀</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PANTALLA: JUEGO
+════════════════════════════════════════════════ -->
+<div id="screen-game" class="screen">
+  <div class="game-layout">
+
+    <!-- HUD -->
+    <div class="hud">
+      <div class="hud-item">
+        <span class="hud-label">VIDAS</span>
+        <span id="hud-lives">❤️❤️❤️</span>
+      </div>
+      <div class="hud-item hud-center">
+        <span class="hud-label">PUNTOS</span>
+        <span id="hud-score" class="hud-value">0</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">TIEMPO</span>
+        <span id="hud-time" class="hud-value">--</span>
+      </div>
+    </div>
+
+    <!-- Combo -->
+    <div id="combo-display" class="combo-display hidden">
+      <span id="combo-text">🔥 x2</span>
+    </div>
+
+    <!-- Pentagrama SVG -->
+    <div class="staff-container" id="staff-container">
+      <svg id="staff-svg" viewBox="0 0 520 200" xmlns="http://www.w3.org/2000/svg"
+           aria-label="Pentagrama con nota"></svg>
+    </div>
+
+    <!-- Feedback -->
+    <div id="feedback-msg" class="feedback-msg" aria-live="polite"></div>
+
+    <!-- Botones de respuesta -->
+    <div id="answer-buttons" class="answer-buttons"></div>
+
+    <!-- Salir -->
+    <button class="btn-quit" onclick="confirmQuit()">✕ Salir</button>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PANTALLA: RESULTADOS
+════════════════════════════════════════════════ -->
+<div id="screen-results" class="screen">
+  <div class="screen-content results-content">
+    <div id="results-emoji" class="results-emoji">🎉</div>
+    <h2 id="results-title">¡Bien hecho!</h2>
+
+    <div class="results-stats">
+      <div class="stat-card">
+        <span class="stat-value" id="res-score">0</span>
+        <span class="stat-label">Puntos</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="res-accuracy">0%</span>
+        <span class="stat-label">Precisión</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="res-combo">x0</span>
+        <span class="stat-label">Combo máx.</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="res-answers">0/0</span>
+        <span class="stat-label">Respuestas</span>
+      </div>
+    </div>
+
+    <div id="level-unlock-msg" class="level-unlock-msg hidden"></div>
+
+    <div class="results-buttons">
+      <button class="btn-primary"   onclick="playAgain()">🔄 Otra vez</button>
+      <button class="btn-secondary" onclick="showScreen('mode')">🏠 Menú</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PANTALLA: RÉCORDS
+════════════════════════════════════════════════ -->
+<div id="screen-records" class="screen">
+  <div class="screen-content">
+    <button class="btn-back" onclick="showScreen('home')">← Inicio</button>
+    <h2>🏆 Récords</h2>
+    <div id="records-list" class="records-list"></div>
+    <button class="btn-small danger-btn" onclick="clearRecords()" style="margin-top:24px">
+      🗑 Borrar récords
+    </button>
+  </div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
