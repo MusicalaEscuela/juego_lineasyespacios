@@ -16,11 +16,10 @@
 ════════════════════════════════════════════════ -->
 <div id="screen-home" class="screen active">
   <div class="home-bg-deco" aria-hidden="true">
-    <span>𝄞</span><span>𝄢</span><span>♩</span><span>♪</span><span>♫</span>
+    <span>𝄞</span><span>𝄢</span><span>𝄡</span><span>♩</span><span>♫</span>
   </div>
   <div class="home-content">
-    <img src="https://static.wixstatic.com/media/85afce_3adb3865c88a492b93a8bf2dc69049c3~mv2.png"
-         alt="Musicala" class="logo" onerror="this.style.display='none'">
+    <img src="logo.png" alt="Musicala" class="logo" onerror="this.style.display='none'">
     <h1 class="game-title">Musinotas</h1>
     <p class="game-subtitle">Domina la lectura del pentagrama</p>
     <div class="home-buttons">
@@ -30,6 +29,7 @@
     <div class="home-clef-row">
       <span class="clef-deco sol">𝄞</span>
       <span class="clef-deco fa">𝄢</span>
+      <span class="clef-deco do">𝄡</span>
     </div>
   </div>
 </div>
@@ -47,7 +47,7 @@
         <div class="mode-icon">🎯</div>
         <h3>Modo Progresivo</h3>
         <p>Avanza nivel por nivel, desde las notas más básicas hasta dominar las dos claves.</p>
-        <span class="mode-badge">8 niveles</span>
+        <span class="mode-badge">12 niveles</span>
       </div>
 
       <div class="mode-card" onclick="showScreen('config')">
@@ -86,7 +86,9 @@
       <div class="toggle-group" id="clef-toggle">
         <button class="toggle-btn active" data-value="treble" onclick="setConfigClef('treble')">𝄞 Clave de Sol</button>
         <button class="toggle-btn"        data-value="bass"   onclick="setConfigClef('bass')">𝄢 Clave de Fa</button>
-        <button class="toggle-btn"        data-value="both"   onclick="setConfigClef('both')">Ambas</button>
+        <button class="toggle-btn"        data-value="alto"   onclick="setConfigClef('alto')">𝄡 Clave de Do</button>
+        <button class="toggle-btn"        data-value="both"   onclick="setConfigClef('both')">Sol + Fa</button>
+        <button class="toggle-btn"        data-value="all"    onclick="setConfigClef('all')">Todas</button>
       </div>
     </div>
 
@@ -204,7 +206,13 @@
         <span class="stat-value" id="res-answers">0/0</span>
         <span class="stat-label">Respuestas</span>
       </div>
+      <div class="stat-card">
+        <span class="stat-value" id="res-speed">0,00</span>
+        <span class="stat-label">Ritmo</span>
+      </div>
     </div>
+
+    <div id="pro-comparison" class="pro-comparison"></div>
 
     <div id="level-unlock-msg" class="level-unlock-msg hidden"></div>
 

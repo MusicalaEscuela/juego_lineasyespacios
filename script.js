@@ -1,6 +1,6 @@
 // ================================================================
 // MUSINOTAS — script.js
-// Lectura de pentagrama · Clave de Sol y Fa
+// Lectura de pentagrama · Claves de Sol, Fa y Do
 // ================================================================
 
 // ----------------------------------------------------------------
@@ -29,12 +29,29 @@ const NOTES_DATA = {
     { id: 'F3', name: 'Fa',  staffPos: 6, type: 'line',  clef: 'bass', tone: 'F3' },
     { id: 'G3', name: 'Sol', staffPos: 7, type: 'space', clef: 'bass', tone: 'G3' },
     { id: 'A3', name: 'La',  staffPos: 8, type: 'line',  clef: 'bass', tone: 'A3' },
+  ],
+  alto: [
+    // Clave de Do en tercera línea (clave de alto): la línea central es Do4.
+    { id: 'alto-F3', name: 'Fa',  staffPos: 0, type: 'line',  clef: 'alto', tone: 'F3' },
+    { id: 'alto-G3', name: 'Sol', staffPos: 1, type: 'space', clef: 'alto', tone: 'G3' },
+    { id: 'alto-A3', name: 'La',  staffPos: 2, type: 'line',  clef: 'alto', tone: 'A3' },
+    { id: 'alto-B3', name: 'Si',  staffPos: 3, type: 'space', clef: 'alto', tone: 'B3' },
+    { id: 'alto-C4', name: 'Do',  staffPos: 4, type: 'line',  clef: 'alto', tone: 'C4' },
+    { id: 'alto-D4', name: 'Re',  staffPos: 5, type: 'space', clef: 'alto', tone: 'D4' },
+    { id: 'alto-E4', name: 'Mi',  staffPos: 6, type: 'line',  clef: 'alto', tone: 'E4' },
+    { id: 'alto-F4', name: 'Fa',  staffPos: 7, type: 'space', clef: 'alto', tone: 'F4' },
+    { id: 'alto-G4', name: 'Sol', staffPos: 8, type: 'line',  clef: 'alto', tone: 'G4' },
   ]
 };
 
-const ALL_NOTES  = [...NOTES_DATA.treble, ...NOTES_DATA.bass];
+const ALL_NOTES  = [...NOTES_DATA.treble, ...NOTES_DATA.bass, ...NOTES_DATA.alto];
 const NOTE_NAMES = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
 const getNoteById = id => ALL_NOTES.find(n => n.id === id);
+
+// Meta didáctica configurable para comparar fluidez al final.
+// 1 nota correcta por segundo es una meta clara para estudiantes: sencilla de entender,
+// motivadora y útil para medir avance sin vender humo con pentagrama.
+const FLUENCY_GOAL_NOTES_PER_SECOND = 1;
 
 // ----------------------------------------------------------------
 // 2. NIVELES
@@ -105,7 +122,39 @@ const LEVELS = [
     subtitle: 'Sol y Fa mezcladas · Nivel maestro',
     noteIds: ['E4','F4','G4','A4','B4','C5','D5','E5','F5','G2','A2','B2','C3','D3','E3','F3','G3','A3'],
     timeLimit: 150, lives: 3, requiredAccuracy: 80,
-    tip: 'El reto definitivo: identifica la clave primero'
+    tip: 'Identifica primero si estás en clave de Sol o de Fa'
+  },
+  {
+    id: 9, icon: '🧭',
+    name: 'Do: las líneas',
+    subtitle: 'Clave de Do · Líneas (Fa·La·Do·Mi·Sol)',
+    noteIds: ['alto-F3','alto-A3','alto-C4','alto-E4','alto-G4'],
+    timeLimit: 90, lives: 5, requiredAccuracy: 70,
+    tip: 'En clave de Do, la línea central marca Do'
+  },
+  {
+    id: 10, icon: '🎻',
+    name: 'Do: los espacios',
+    subtitle: 'Clave de Do · Espacios (Sol·Si·Re·Fa)',
+    noteIds: ['alto-G3','alto-B3','alto-D4','alto-F4'],
+    timeLimit: 90, lives: 5, requiredAccuracy: 70,
+    tip: 'Lee alrededor del Do central: Sol·Si·Re·Fa'
+  },
+  {
+    id: 11, icon: '💫',
+    name: 'Do completa',
+    subtitle: 'Clave de Do · Líneas y espacios',
+    noteIds: ['alto-F3','alto-G3','alto-A3','alto-B3','alto-C4','alto-D4','alto-E4','alto-F4','alto-G4'],
+    timeLimit: 120, lives: 4, requiredAccuracy: 75,
+    tip: 'Todo el pentagrama en clave de Do en tercera línea'
+  },
+  {
+    id: 12, icon: '👑',
+    name: 'Tres claves',
+    subtitle: 'Sol, Fa y Do mezcladas · Reto maestro',
+    noteIds: ['E4','F4','G4','A4','B4','C5','D5','E5','F5','G2','A2','B2','C3','D3','E3','F3','G3','A3','alto-F3','alto-G3','alto-A3','alto-B3','alto-C4','alto-D4','alto-E4','alto-F4','alto-G4'],
+    timeLimit: 180, lives: 3, requiredAccuracy: 82,
+    tip: 'Ahora sí: tres claves, cero misericordia musical'
   },
 ];
 
@@ -131,6 +180,10 @@ const state = {
   timerInterval:  null,
   totalAnswers:   0,
   correctAnswers: 0,
+  startedAt:      null,
+  lastDurationSeconds: 0,
+  lastNotesPerSecond: 0,
+  lastFluencyPercent: 0,
   gameActive:     false,
   answering:      false,
 
@@ -267,8 +320,9 @@ function setConfigType(type) {
 
 function getFilteredNotes(clef, type) {
   let notes = [];
-  if (clef === 'treble' || clef === 'both') notes = [...notes, ...NOTES_DATA.treble];
-  if (clef === 'bass'   || clef === 'both') notes = [...notes, ...NOTES_DATA.bass];
+  if (clef === 'treble' || clef === 'both' || clef === 'all') notes = [...notes, ...NOTES_DATA.treble];
+  if (clef === 'bass'   || clef === 'both' || clef === 'all') notes = [...notes, ...NOTES_DATA.bass];
+  if (clef === 'alto'   || clef === 'all') notes = [...notes, ...NOTES_DATA.alto];
   if (type === 'line')  notes = notes.filter(n => n.type === 'line');
   if (type === 'space') notes = notes.filter(n => n.type === 'space');
   return notes;
@@ -281,7 +335,7 @@ function updateNotePicker() {
 
   picker.innerHTML = notes.map(note => {
     const selected   = selectedNoteIds.has(note.id);
-    const clefSymbol = note.clef === 'treble' ? '𝄞' : '𝄢';
+    const clefSymbol = getClefSymbol(note.clef);
     const typeLabel  = note.type === 'line' ? '—' : '○';
     return `<div class="note-chip ${selected ? 'selected' : ''}"
                  onclick="toggleNote('${note.id}')"
@@ -290,6 +344,13 @@ function updateNotePicker() {
       <span class="chip-sub">${clefSymbol}${typeLabel}</span>
     </div>`;
   }).join('');
+}
+
+function getClefSymbol(clef) {
+  if (clef === 'treble') return '𝄞';
+  if (clef === 'bass') return '𝄢';
+  if (clef === 'alto') return '𝄡';
+  return '♪';
 }
 
 function toggleNote(noteId) {
@@ -353,6 +414,10 @@ function startGame(noteIds, timeLimit, lives) {
     timeRemaining:  timeLimit,
     totalAnswers:   0,
     correctAnswers: 0,
+    startedAt:      Date.now(),
+    lastDurationSeconds: 0,
+    lastNotesPerSecond: 0,
+    lastFluencyPercent: 0,
     gameActive:     true,
     answering:      false,
     lastNoteId:     null,
@@ -553,6 +618,8 @@ function endGame(reason) {
     ? Math.round((state.correctAnswers / state.totalAnswers) * 100)
     : 0;
 
+  const performance = calculateReadingBenchmark();
+
   if (reason === 'lives') playGameOver();
   else                    playVictory();
 
@@ -565,10 +632,50 @@ function endGame(reason) {
     levelId:  state.currentLevelId,
     correct:  state.correctAnswers,
     total:    state.totalAnswers,
+    speedNps: performance.notesPerSecond,
+    fluencyPercent: performance.fluencyPercent,
+    durationSeconds: performance.elapsedSeconds,
     date:     new Date().toLocaleDateString('es-CO'),
   });
 
   setTimeout(() => showResults(reason, accuracy), 700);
+}
+
+function calculateReadingBenchmark() {
+  const startedAt = state.startedAt || Date.now();
+  const elapsedSeconds = Math.max(1, Math.round((Date.now() - startedAt) / 1000));
+  const notesPerSecond = state.correctAnswers > 0
+    ? state.correctAnswers / elapsedSeconds
+    : 0;
+  const fluencyPercent = Math.round((notesPerSecond / FLUENCY_GOAL_NOTES_PER_SECOND) * 100);
+
+  state.lastDurationSeconds = elapsedSeconds;
+  state.lastNotesPerSecond  = notesPerSecond;
+  state.lastFluencyPercent      = fluencyPercent;
+
+  return { elapsedSeconds, notesPerSecond, fluencyPercent };
+}
+
+function formatNotesPerSecond(value) {
+  return value.toFixed(2).replace('.', ',');
+}
+
+function getBenchmarkMessage(fluencyPercent, notesPerSecond) {
+  const speed = formatNotesPerSecond(notesPerSecond);
+
+  if (fluencyPercent >= 150) {
+    return `🚀 Leíste ${speed} notas correctas por segundo. ¡Vas al ${fluencyPercent}% de la meta de lectura fluida! Estás volando en este reto.`;
+  }
+  if (fluencyPercent >= 100) {
+    return `🏆 Leíste ${speed} notas correctas por segundo. ¡Llegaste a la meta de lectura fluida! Eso ya se siente seguro y musical.`;
+  }
+  if (fluencyPercent >= 75) {
+    return `⭐ Leíste ${speed} notas correctas por segundo. Vas al ${fluencyPercent}% de la meta. Estás cerquita de leer con mucha más soltura.`;
+  }
+  if (fluencyPercent >= 50) {
+    return `🎵 Leíste ${speed} notas correctas por segundo. Vas al ${fluencyPercent}% de la meta. Ya hay avance, falta que el cerebro deje de hacer drama.`;
+  }
+  return `🌱 Leíste ${speed} notas correctas por segundo. Vas al ${fluencyPercent}% de la meta. Primero se reconoce, después se acelera.`;
 }
 
 function showResults(reason, accuracy) {
@@ -585,6 +692,14 @@ function showResults(reason, accuracy) {
   document.getElementById('res-accuracy').textContent     = `${accuracy}%`;
   document.getElementById('res-combo').textContent        = `×${state.maxCombo}`;
   document.getElementById('res-answers').textContent      = `${state.correctAnswers}/${state.totalAnswers}`;
+  document.getElementById('res-speed').textContent        = formatNotesPerSecond(state.lastNotesPerSecond);
+
+  const proEl = document.getElementById('pro-comparison');
+  proEl.innerHTML = `
+    <div class="pro-badge">${state.lastFluencyPercent}% de la meta de fluidez</div>
+    <p>${getBenchmarkMessage(state.lastFluencyPercent, state.lastNotesPerSecond)}</p>
+    <small>Meta del juego: leer 1 nota correcta por segundo. Un músico con mucha experiencia puede ir más rápido, pero esta meta ayuda a medir el avance sin enredar a los estudiantes.</small>
+  `;
 
   // Mensaje de desbloqueo
   const unlockEl = document.getElementById('level-unlock-msg');
@@ -647,6 +762,7 @@ const SVG_NOTE_X  = 300;
 const SVG_LINE_YS = [135, 115, 95, 75, 55]; // índice 0 = línea inferior
 
 const BASS_CLEF_SVG = { symbol: '&#x1D122;', x: 82, y: 150, fontSize: 140 };
+const ALTO_CLEF_SVG = { symbol: '&#x1D121;', x: 86, y: 132, fontSize: 108 };
 
 function posToY(staffPos) {
   return 135 - staffPos * 10;
@@ -676,11 +792,17 @@ function buildStaffSVG(note, noteState) {
     html += `<text x="86" y="130"
       font-size="106" font-family="${musicFont}"
       fill="#222222" style="line-height:1">&#x1D11E;</text>`;
-  } else {
+  } else if (note.clef === 'bass') {
     // 𝄢 (U+1D122) — los puntos quedan entre líneas 3 y 4 (y≈65-75)
     html += `<text x="${BASS_CLEF_SVG.x}" y="${BASS_CLEF_SVG.y}"
       font-size="${BASS_CLEF_SVG.fontSize}" font-family="${musicFont}"
       fill="#222222" style="line-height:1">${BASS_CLEF_SVG.symbol}</text>`;
+  } else if (note.clef === 'alto') {
+    // 𝄡 (U+1D121) — clave de Do en 3ª línea: la línea central es Do4.
+    html += `<text x="${ALTO_CLEF_SVG.x}" y="${ALTO_CLEF_SVG.y}"
+      font-size="${ALTO_CLEF_SVG.fontSize}" font-family="${musicFont}"
+      fill="#222222" style="line-height:1">${ALTO_CLEF_SVG.symbol}</text>`;
+    html += `<circle cx="132" cy="95" r="4" fill="#222222" opacity=".75"/>`;
   }
 
   // ── Nota ───────────────────────────────────────────────────────
@@ -835,7 +957,7 @@ function renderRecords() {
     return `<div class="record-item">
       <div class="record-left">
         <div class="record-name">${medal} ${levelName}</div>
-        <div class="record-sub">${r.date} · ${r.accuracy}% precisión · ${r.correct}/${r.total}</div>
+        <div class="record-sub">${r.date} · ${r.accuracy}% precisión · ${r.correct}/${r.total}${r.speedNps ? ` · ${formatNotesPerSecond(r.speedNps)} notas/s` : ''}</div>
       </div>
       <div class="record-score">${r.score} pts</div>
     </div>`;
