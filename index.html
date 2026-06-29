@@ -3,11 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Evita que el navegador sirva una versión vieja del HTML en caché -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Musinotas 🎼</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <!-- Sube el número ?v= en cada publicación para forzar la descarga de la versión nueva -->
+  <link rel="stylesheet" href="styles.css?v=20260629">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.26/Tone.min.js"></script>
+
+  <!-- ─────────────────────────────────────────────────────────────
+       AUTO-ACTUALIZACIÓN
+       Comprueba version.txt al abrir y al volver a la app. Si hay
+       una versión más nueva publicada, recarga sola (sin Ctrl+F5).
+       En cada publicación: subir APP_VERSION aquí Y el número en version.txt.
+  ────────────────────────────────────────────────────────────── -->
+  <script>
+    window.APP_VERSION = '20260629';
+    (function () {
+      function checkForUpdate() {
+        fetch('version.txt?t=' + Date.now(), { cache: 'no-store' })
+          .then(function (r) { return r.ok ? r.text() : null; })
+          .then(function (latest) {
+            if (!latest) return;
+            latest = latest.trim();
+            if (latest && latest !== window.APP_VERSION) {
+              location.reload();
+            }
+          })
+          .catch(function () { /* sin conexión: se ignora */ });
+      }
+      // Al volver a la pestaña/app (clave en celular)
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'visible') checkForUpdate();
+      });
+      window.addEventListener('focus', checkForUpdate);
+      // Primera comprobación poco después de cargar
+      setTimeout(checkForUpdate, 3000);
+    })();
+  </script>
 </head>
 <body>
 
@@ -297,6 +333,6 @@
   </div>
 </div>
 
-<script src="script.js"></script>
+<script src="script.js?v=20260629"></script>
 </body>
 </html>
