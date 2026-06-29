@@ -723,3 +723,62 @@ h2 {
   .game-layout { gap: 7px; padding: 10px 12px; }
   .staff-container { padding: 12px 10px; }
 }
+/* ================================================================
+   PANTALLA: CÓMO APRENDER (método Musicala)
+================================================================ */
+.learn-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-sm);
+}
+.learn-card h3 {
+  font-size: 1.05rem;
+  margin-bottom: 10px;
+  color: var(--accent);
+}
+.learn-card p { color: var(--text); line-height: 1.55; margin-bottom: 8px; }
+.learn-card p:last-child { margin-bottom: 0; }
+.learn-card b { color: #fff; }
+
+.learn-list { margin: 4px 0 0 18px; color: var(--text); line-height: 1.6; }
+.learn-list li { margin-bottom: 6px; }
+
+.learn-key {
+  background: linear-gradient(135deg, rgba(255,209,102,0.10), rgba(155,114,207,0.10));
+  border-color: var(--border2);
+}
+
+.learn-mnemo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 12px;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--border);
+}
+.learn-mnemo:last-child { border-bottom: none; }
+.learn-mnemo span {
+  color: var(--text2);
+  font-size: 0.82rem;
+  min-width: 168px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.learn-mnemo b {
+  color: var(--accent2);
+  font-size: 1.15rem;
+  letter-spacing: 1px;
+}
+
+.learn-central {
+  border-color: rgba(17,138,178,0.5);
+  background: linear-gradient(135deg, rgba(17,138,178,0.12), rgba(6,214,160,0.06));
+}
+.learn-central h3 { color: var(--info); }
+
+@media (max-width: 480px) {
+  .learn-mnemo span { min-width: 100%; }
+}

@@ -24,6 +24,7 @@
     <p class="game-subtitle">Domina la lectura del pentagrama</p>
     <div class="home-buttons">
       <button class="btn-primary" onclick="showScreen('mode')">🎮 Jugar</button>
+      <button class="btn-secondary" onclick="showScreen('learn')">📖 Cómo aprender</button>
       <button class="btn-secondary" onclick="showScreen('records')">🏆 Récords</button>
     </div>
     <div class="home-clef-row">
@@ -220,6 +221,65 @@
       <button class="btn-primary"   onclick="playAgain()">🔄 Otra vez</button>
       <button class="btn-secondary" onclick="showScreen('mode')">🏠 Menú</button>
     </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PANTALLA: CÓMO APRENDER (AYUDA + MÉTODO MUSICALA)
+════════════════════════════════════════════════ -->
+<div id="screen-learn" class="screen">
+  <div class="screen-content">
+    <button class="btn-back" onclick="showScreen('home')">← Inicio</button>
+    <h2>📖 Cómo aprender a leer</h2>
+    <p class="screen-desc">El método con el que enseña Musicala: leer cada nota <b>de memoria por su posición</b>, no contando desde otra.</p>
+
+    <div class="learn-card">
+      <h3>🎮 Cómo se juega</h3>
+      <ol class="learn-list">
+        <li>Aparece una nota en el pentagrama con su clave.</li>
+        <li>Toca el botón con el nombre correcto: <b>Do · Re · Mi · Fa · Sol · La · Si</b>.</li>
+        <li>Si aciertas, suena la nota y sumas puntos; encadena aciertos para multiplicar tu racha 🔥.</li>
+        <li>Avanza por los niveles o crea tu propia práctica en <b>Modo Libre</b>.</li>
+      </ol>
+    </div>
+
+    <div class="learn-card learn-key">
+      <h3>💡 La idea clave</h3>
+      <p>No se trata de pensar «esta es Do, entonces la siguiente es Re, luego Mi…». Eso es lento.
+      El objetivo es que <b>cada posición del pentagrama dispare el nombre de la nota al instante</b>,
+      igual que reconoces una letra sin deletrear. Por eso se entrena <b>de abajo hacia arriba</b> y por separado: primero las líneas, luego los espacios.</p>
+    </div>
+
+    <div class="learn-card">
+      <h3>𝄞 Clave de Sol</h3>
+      <p class="learn-mnemo"><span>Líneas (abajo → arriba)</span> <b>Mi · Sol · Si · Re · Fa</b></p>
+      <p class="learn-mnemo"><span>Espacios (abajo → arriba)</span> <b>Fa · La · Do · Mi</b></p>
+    </div>
+
+    <div class="learn-card">
+      <h3>𝄢 Clave de Fa</h3>
+      <p class="learn-mnemo"><span>Líneas (abajo → arriba)</span> <b>Sol · Si · Re · Fa · La</b></p>
+      <p class="learn-mnemo"><span>Espacios (abajo → arriba)</span> <b>La · Do · Mi · Sol</b></p>
+    </div>
+
+    <div class="learn-card">
+      <h3>𝄡 Clave de Do (en 3ª línea)</h3>
+      <p class="learn-mnemo"><span>Líneas (abajo → arriba)</span> <b>Fa · La · Do · Mi · Sol</b></p>
+      <p class="learn-mnemo"><span>Espacios (abajo → arriba)</span> <b>Sol · Si · Re · Fa</b></p>
+    </div>
+
+    <div class="learn-card learn-central">
+      <h3>🔵 El Do central: la nota puente</h3>
+      <p>El <b>Do central</b> es el mismo sonido en las tres claves, pero se escribe en lugares distintos usando <b>líneas adicionales</b> (rayitas cortas fuera del pentagrama):</p>
+      <ul class="learn-list">
+        <li><b>Clave de Sol:</b> una línea adicional <i>debajo</i> del pentagrama.</li>
+        <li><b>Clave de Fa:</b> una línea adicional <i>encima</i> del pentagrama.</li>
+        <li><b>Clave de Do:</b> justo en la <i>línea central</i>.</li>
+      </ul>
+      <p>Reconocerlo en las tres claves es la llave para conectar todo el sistema. Practícalo en el <b>Nivel 13</b>.</p>
+    </div>
+
+    <button class="btn-primary" onclick="showScreen('mode')" style="margin-top:8px">🎮 ¡A practicar!</button>
   </div>
 </div>
 
