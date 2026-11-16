@@ -20,3 +20,10 @@ coinciden, la recarga automática para las usuarias se rompe.
 ## Idioma / tono
 Todo el texto visible es para **estudiantes**: segunda persona, claro y motivador. No
 incluir comentarios meta como "para no enredar a los estudiantes" ni bromas fuera de tono.
+
+## App instalable (PWA) y APK
+- `sw.js` usa "red primero" para los archivos propios: **no** requiere cambios al publicar y
+  no debe cachear `version.txt`. Si agregas un archivo nuevo imprescindible, súmalo a `CORE`.
+- `apk/` es un envoltorio Capacitor que carga la web publicada (`server.url`); no necesita
+  recompilarse cuando cambia el juego. **Nunca** subas `apk/signing/` al repositorio.
+- El juego no usa `alert/confirm/prompt`: usa `openModal()` y `showToast()` de `script.js`.

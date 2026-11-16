@@ -1,0 +1,11 @@
+{
+  "appId": "com.musicala.musinotas",
+  "appName": "Musinotas",
+  "webDir": "www",
+  "backgroundColor": "#0c0b18",
+  "server": {
+    "url": "https://musicalaescuela.github.io/juego_lineasyespacios/",
+    "errorPath": "offline.html",
+    "androidScheme": "https"
+  }
+}

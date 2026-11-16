@@ -2,17 +2,81 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0c0b18">
+  <meta name="description" content="Musinotas: aprende a leer el pentagrama jugando. Claves de Sol, Fa y Do.">
   <!-- Evita que el navegador sirva una versión vieja del HTML en caché -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Musinotas 🎼</title>
+
+  <!-- App instalable (PWA) -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Musinotas">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Fuente musical (solo las 3 claves) para que se vean igual en todos los dispositivos -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Music&text=%F0%9D%84%9E%F0%9D%84%A2%F0%9D%84%A1&display=swap" rel="stylesheet">
   <!-- Sube el número ?v= en cada publicación para forzar la descarga de la versión nueva -->
-  <link rel="stylesheet" href="styles.css?v=20260629">
+  <link rel="stylesheet" href="styles.css?v=20261116">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.26/Tone.min.js"></script>
+
+  <!-- ─────────────────────────────────────────────────────────────
+       RÉCORDS GLOBALES (Firebase Firestore)
+       Lista de récords compartida por todas las usuarias.
+       Si Firebase no carga (sin conexión), el juego funciona igual
+       pero solo con récords locales de este dispositivo.
+  ────────────────────────────────────────────────────────────── -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getFirestore, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // Proyecto Firebase compartido "musipuntos". Musinotas usa SOLO
+    // la colección "musinotas_records" para no interferir con otras apps.
+    const firebaseConfig = {
+      apiKey: "AIzaSyAQEf6uuVcaLubxuzmD_p76oQsmU7Y6Aj0",
+      authDomain: "musipuntos.firebaseapp.com",
+      projectId: "musipuntos",
+      storageBucket: "musipuntos.firebasestorage.app",
+      messagingSenderId: "539172840874",
+      appId: "1:539172840874:web:20005a2d844584235ab7d3"
+    };
+
+    // Solo se activa si la configuración ya fue pegada (no es el placeholder).
+    if (firebaseConfig.projectId && firebaseConfig.projectId !== "PEGA_AQUI") {
+      try {
+        const app = initializeApp(firebaseConfig);
+        const db  = getFirestore(app);
+
+        window.MusinotasDB = {
+          async saveGlobalRecord(entry) {
+            await addDoc(collection(db, "musinotas_records"), {
+              ...entry,
+              createdAt: serverTimestamp()
+            });
+          },
+          async loadGlobalRecords(max = 20) {
+            const q = query(collection(db, "musinotas_records"), orderBy("score", "desc"), limit(max));
+            const snap = await getDocs(q);
+            return snap.docs.map(d => d.data());
+          }
+        };
+        window.dispatchEvent(new Event("musinotas-db-ready"));
+      } catch (e) {
+        console.warn("Firebase no se pudo iniciar; se usarán récords locales.", e);
+      }
+    }
+  </script>
 
   <!-- ─────────────────────────────────────────────────────────────
        AUTO-ACTUALIZACIÓN
@@ -21,13 +85,15 @@
        En cada publicación: subir APP_VERSION aquí Y el número en version.txt.
   ────────────────────────────────────────────────────────────── -->
   <script>
-    window.APP_VERSION = '20260629';
+    window.APP_VERSION = '20261116';
     (function () {
       function checkForUpdate() {
+        // No interrumpir una partida en curso: se revisa al terminar.
+        if (window.MUSINOTAS_PLAYING) return;
         fetch('version.txt?t=' + Date.now(), { cache: 'no-store' })
           .then(function (r) { return r.ok ? r.text() : null; })
           .then(function (latest) {
-            if (!latest) return;
+            if (!latest || window.MUSINOTAS_PLAYING) return;
             latest = latest.trim();
             if (latest && latest !== window.APP_VERSION) {
               location.reload();
@@ -35,6 +101,7 @@
           })
           .catch(function () { /* sin conexión: se ignora */ });
       }
+      window.checkForUpdate = checkForUpdate;
       // Al volver a la pestaña/app (clave en celular)
       document.addEventListener('visibilitychange', function () {
         if (document.visibilityState === 'visible') checkForUpdate();
@@ -42,6 +109,13 @@
       window.addEventListener('focus', checkForUpdate);
       // Primera comprobación poco después de cargar
       setTimeout(checkForUpdate, 3000);
+
+      // Service worker: permite instalar la app y usarla sin conexión.
+      if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('sw.js').catch(function () {});
+        });
+      }
     })();
   </script>
 </head>
@@ -55,18 +129,22 @@
     <span>𝄞</span><span>𝄢</span><span>𝄡</span><span>♩</span><span>♫</span>
   </div>
   <div class="home-content">
-    <img src="logo.png" alt="Musicala" class="logo" onerror="this.style.display='none'">
+    <div class="logo-wrap"><img src="logo.png" alt="Musicala" class="logo" onerror="this.parentNode.style.display='none'"></div>
     <h1 class="game-title">Musinotas</h1>
     <p class="game-subtitle">Domina la lectura del pentagrama</p>
+    <div id="home-stats" class="home-stats"></div>
     <div class="home-buttons">
-      <button class="btn-primary" onclick="showScreen('mode')">🎮 Jugar</button>
-      <button class="btn-secondary" onclick="showScreen('learn')">📖 Cómo aprender</button>
-      <button class="btn-secondary" onclick="showScreen('records')">🏆 Récords</button>
+      <button id="btn-continue" class="btn-primary hidden" onclick="continueProgress()">▶ Continuar</button>
+      <button id="btn-play" class="btn-primary" onclick="showScreen('mode')">🎮 Jugar</button>
+      <div class="home-row">
+        <button class="btn-secondary" onclick="showScreen('learn')">📖 Aprender</button>
+        <button class="btn-secondary" onclick="showScreen('records')">🏆 Récords</button>
+      </div>
+      <button id="btn-install" class="btn-secondary btn-brand hidden" onclick="installApp()">📲 Instalar la app</button>
     </div>
-    <div class="home-clef-row">
-      <span class="clef-deco sol">𝄞</span>
-      <span class="clef-deco fa">𝄢</span>
-      <span class="clef-deco do">𝄡</span>
+    <div class="home-footer">
+      <button class="btn-small" id="btn-sound-home" onclick="toggleSound()">🔊 Sonido</button>
+      <span class="app-version" id="app-version"></span>
     </div>
   </div>
 </div>
@@ -80,19 +158,33 @@
     <h2>¿Cómo quieres practicar?</h2>
     <div class="mode-cards">
 
-      <div class="mode-card" onclick="showScreen('levels')">
+      <button class="mode-card" onclick="showScreen('levels')">
         <div class="mode-icon">🎯</div>
         <h3>Modo Progresivo</h3>
-        <p>Avanza nivel por nivel, desde las notas más básicas hasta dominar las dos claves.</p>
-        <span class="mode-badge">12 niveles</span>
-      </div>
+        <p>Avanza nivel por nivel, desde las notas más básicas hasta dominar las tres claves.</p>
+        <span class="mode-badge" id="mode-levels-badge">Niveles</span>
+      </button>
 
-      <div class="mode-card" onclick="showScreen('config')">
+      <button class="mode-card" onclick="showScreen('config')">
         <div class="mode-icon">🎨</div>
         <h3>Modo Libre</h3>
         <p>Elige exactamente qué notas practicar, a tu ritmo y con tus propias reglas.</p>
         <span class="mode-badge">Personalizable</span>
-      </div>
+      </button>
+
+      <button class="mode-card" onclick="startWeakNotesGame()">
+        <div class="mode-icon">🧠</div>
+        <h3>Repaso inteligente</h3>
+        <p>Practica las notas que más te cuestan. El juego recuerda tus errores y te las repite.</p>
+        <span class="mode-badge" id="mode-weak-badge">Tus notas difíciles</span>
+      </button>
+
+      <button class="mode-card" onclick="startBlitzGame()">
+        <div class="mode-icon">⚡</div>
+        <h3>Reto relámpago</h3>
+        <p>60 segundos con todas las notas de los niveles que ya superaste. ¿Cuál es tu mejor puntaje?</p>
+        <span class="mode-badge">Contrarreloj</span>
+      </button>
 
     </div>
   </div>
@@ -106,6 +198,7 @@
     <button class="btn-back" onclick="showScreen('mode')">← Modos</button>
     <h2>🎯 Modo Progresivo</h2>
     <p class="screen-desc">Cumple el porcentaje de aciertos requerido para desbloquear el siguiente nivel.</p>
+    <div id="levels-summary" class="levels-summary"></div>
     <div id="levels-grid" class="levels-grid"></div>
   </div>
 </div>
@@ -121,9 +214,9 @@
     <div class="config-section">
       <h3>🎼 Clave</h3>
       <div class="toggle-group" id="clef-toggle">
-        <button class="toggle-btn active" data-value="treble" onclick="setConfigClef('treble')">𝄞 Clave de Sol</button>
-        <button class="toggle-btn"        data-value="bass"   onclick="setConfigClef('bass')">𝄢 Clave de Fa</button>
-        <button class="toggle-btn"        data-value="alto"   onclick="setConfigClef('alto')">𝄡 Clave de Do</button>
+        <button class="toggle-btn active" data-value="treble" onclick="setConfigClef('treble')">Clave de Sol</button>
+        <button class="toggle-btn"        data-value="bass"   onclick="setConfigClef('bass')">Clave de Fa</button>
+        <button class="toggle-btn"        data-value="alto"   onclick="setConfigClef('alto')">Clave de Do</button>
         <button class="toggle-btn"        data-value="both"   onclick="setConfigClef('both')">Sol + Fa</button>
         <button class="toggle-btn"        data-value="all"    onclick="setConfigClef('all')">Todas</button>
       </div>
@@ -144,13 +237,14 @@
       <div class="picker-actions">
         <button class="btn-small" onclick="selectAllNotes()">Todas</button>
         <button class="btn-small" onclick="clearAllNotes()">Ninguna</button>
+        <span class="picker-count" id="picker-count"></span>
       </div>
     </div>
 
     <div class="config-section config-row">
       <div>
         <h3>⏱ Tiempo</h3>
-        <select id="config-time" class="config-select">
+        <select id="config-time" class="config-select" onchange="saveFreeConfig()">
           <option value="0">Sin límite</option>
           <option value="60" selected>1 minuto</option>
           <option value="120">2 minutos</option>
@@ -160,7 +254,7 @@
       </div>
       <div>
         <h3>❤️ Vidas</h3>
-        <select id="config-lives" class="config-select">
+        <select id="config-lives" class="config-select" onchange="saveFreeConfig()">
           <option value="3" selected>3 vidas</option>
           <option value="5">5 vidas</option>
           <option value="10">10 vidas</option>
@@ -181,9 +275,10 @@
 
     <!-- HUD -->
     <div class="hud">
+      <button class="hud-btn" onclick="pauseGame()" aria-label="Pausar">⏸</button>
       <div class="hud-item">
         <span class="hud-label">VIDAS</span>
-        <span id="hud-lives">❤️❤️❤️</span>
+        <span id="hud-lives"></span>
       </div>
       <div class="hud-item hud-center">
         <span class="hud-label">PUNTOS</span>
@@ -193,17 +288,17 @@
         <span class="hud-label">TIEMPO</span>
         <span id="hud-time" class="hud-value">--</span>
       </div>
+      <button class="hud-btn" id="btn-sound-game" onclick="toggleSound()" aria-label="Sonido">🔊</button>
     </div>
 
-    <!-- Combo -->
-    <div id="combo-display" class="combo-display hidden">
-      <span id="combo-text">🔥 x2</span>
-    </div>
+    <div class="time-bar" id="time-bar"><div id="time-bar-fill"></div></div>
+    <div id="game-label" class="game-label"></div>
 
     <!-- Pentagrama SVG -->
     <div class="staff-container" id="staff-container">
+      <div id="combo-display" class="combo-display hidden"><span id="combo-text"></span></div>
       <svg id="staff-svg" viewBox="0 0 520 200" xmlns="http://www.w3.org/2000/svg"
-           aria-label="Pentagrama con nota"></svg>
+           role="img" aria-label="Pentagrama con nota"></svg>
     </div>
 
     <!-- Feedback -->
@@ -211,9 +306,6 @@
 
     <!-- Botones de respuesta -->
     <div id="answer-buttons" class="answer-buttons"></div>
-
-    <!-- Salir -->
-    <button class="btn-quit" onclick="confirmQuit()">✕ Salir</button>
 
   </div>
 </div>
@@ -225,6 +317,9 @@
   <div class="screen-content results-content">
     <div id="results-emoji" class="results-emoji">🎉</div>
     <h2 id="results-title">¡Bien hecho!</h2>
+    <p id="results-sub" class="results-sub"></p>
+    <div id="results-stars" class="results-stars"></div>
+    <div id="new-best" class="new-best hidden">✨ ¡Nuevo récord personal!</div>
 
     <div class="results-stats">
       <div class="stat-card">
@@ -237,24 +332,28 @@
       </div>
       <div class="stat-card">
         <span class="stat-value" id="res-combo">x0</span>
-        <span class="stat-label">Combo máx.</span>
+        <span class="stat-label">Racha máx.</span>
       </div>
       <div class="stat-card">
         <span class="stat-value" id="res-answers">0/0</span>
-        <span class="stat-label">Respuestas</span>
+        <span class="stat-label">Aciertos</span>
       </div>
       <div class="stat-card">
         <span class="stat-value" id="res-speed">0,00</span>
-        <span class="stat-label">Ritmo</span>
+        <span class="stat-label">Notas/seg</span>
       </div>
     </div>
 
-    <div id="pro-comparison" class="pro-comparison"></div>
-
     <div id="level-unlock-msg" class="level-unlock-msg hidden"></div>
 
+    <div id="pro-comparison" class="pro-comparison"></div>
+
+    <div id="review-box" class="review-box hidden"></div>
+
     <div class="results-buttons">
-      <button class="btn-primary"   onclick="playAgain()">🔄 Otra vez</button>
+      <button id="btn-next-level" class="btn-primary hidden" onclick="playNextLevel()">Siguiente nivel ▶</button>
+      <button id="btn-again" class="btn-primary" onclick="playAgain()">🔄 Otra vez</button>
+      <button id="btn-review" class="btn-secondary btn-brand hidden" onclick="practiceMistakes()">🧠 Practicar mis errores</button>
       <button class="btn-secondary" onclick="showScreen('mode')">🏠 Menú</button>
     </div>
   </div>
@@ -273,9 +372,9 @@
       <h3>🎮 Cómo se juega</h3>
       <ol class="learn-list">
         <li>Aparece una nota en el pentagrama con su clave.</li>
-        <li>Toca el botón con el nombre correcto: <b>Do · Re · Mi · Fa · Sol · La · Si</b>.</li>
+        <li>Toca el botón con el nombre correcto: <b>Do · Re · Mi · Fa · Sol · La · Si</b>. En computador también puedes usar las teclas <b>1 a 7</b>.</li>
         <li>Si aciertas, suena la nota y sumas puntos; encadena aciertos para multiplicar tu racha 🔥.</li>
-        <li>Avanza por los niveles o crea tu propia práctica en <b>Modo Libre</b>.</li>
+        <li>Avanza por los niveles, crea tu propia práctica en <b>Modo Libre</b> o refuerza tus notas difíciles en <b>Repaso inteligente</b>.</li>
       </ol>
     </div>
 
@@ -287,19 +386,22 @@
     </div>
 
     <div class="learn-card">
-      <h3>𝄞 Clave de Sol</h3>
+      <h3>Clave de Sol</h3>
+      <div class="learn-staff" data-clef="treble"></div>
       <p class="learn-mnemo"><span>Líneas (abajo → arriba)</span> <b>Mi · Sol · Si · Re · Fa</b></p>
       <p class="learn-mnemo"><span>Espacios (abajo → arriba)</span> <b>Fa · La · Do · Mi</b></p>
     </div>
 
     <div class="learn-card">
-      <h3>𝄢 Clave de Fa</h3>
+      <h3>Clave de Fa</h3>
+      <div class="learn-staff" data-clef="bass"></div>
       <p class="learn-mnemo"><span>Líneas (abajo → arriba)</span> <b>Sol · Si · Re · Fa · La</b></p>
       <p class="learn-mnemo"><span>Espacios (abajo → arriba)</span> <b>La · Do · Mi · Sol</b></p>
     </div>
 
     <div class="learn-card">
-      <h3>𝄡 Clave de Do (en 3ª línea)</h3>
+      <h3>Clave de Do (en 3ª línea)</h3>
+      <div class="learn-staff" data-clef="alto"></div>
       <p class="learn-mnemo"><span>Líneas (abajo → arriba)</span> <b>Fa · La · Do · Mi · Sol</b></p>
       <p class="learn-mnemo"><span>Espacios (abajo → arriba)</span> <b>Sol · Si · Re · Fa</b></p>
     </div>
@@ -326,13 +428,20 @@
   <div class="screen-content">
     <button class="btn-back" onclick="showScreen('home')">← Inicio</button>
     <h2>🏆 Récords</h2>
+    <p class="screen-desc" id="records-desc"></p>
+    <div class="tabs" id="records-tabs">
+      <button class="tab-btn active" data-tab="global" onclick="setRecordsTab('global')">🌍 Todos</button>
+      <button class="tab-btn" data-tab="mine" onclick="setRecordsTab('mine')">📱 Mis récords</button>
+    </div>
     <div id="records-list" class="records-list"></div>
-    <button class="btn-small danger-btn" onclick="clearRecords()" style="margin-top:24px">
-      🗑 Borrar récords
+    <button class="btn-small" onclick="changePlayerName()" style="margin-top:22px">
+      ✏️ Cambiar mi nombre
     </button>
   </div>
 </div>
 
-<script src="script.js?v=20260629"></script>
+<div id="modal-root"></div>
+
+<script src="script.js?v=20261116"></script>
 </body>
 </html>

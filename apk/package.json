@@ -1,0 +1,17 @@
+{
+  "name": "musinotas-apk",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Envoltorio Android (Capacitor) de Musinotas. Carga el juego publicado en GitHub Pages.",
+  "scripts": {
+    "sync": "cap sync android",
+    "build": "node build-apk.mjs"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/core": "^8.6.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.6.2"
+  }
+}

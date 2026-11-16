@@ -1,0 +1,10 @@
+node_modules/
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/capacitor-cordova-android-plugins/
+android/app/src/main/assets/
+# Firma del APK: NUNCA subir al repositorio. Guarda una copia en un lugar seguro.
+signing/
+dist/
